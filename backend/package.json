@@ -11,7 +11,8 @@
     "mock": "USE_MOCK_API=true ts-node-dev ./src/main.ts",
     "build:backend": "npm install && npm run tsc",
     "build:frontend": "rm -rf dist && cd ../frontend && npm install && npm run build && cp -r dist ../backend",
-    "build": "npm run build:backend && npm run build:frontend && npm run db-init"
+    "build": "npm run build:backend && npm run build:frontend && npm run db-init",
+    "nginx": "sudo mkdir -p /var/www && sudo cp -r dist /var/www/requestbin"
   },
   "repository": {
     "type": "git",
