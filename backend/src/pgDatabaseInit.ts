@@ -25,6 +25,9 @@ const initializeDB = async () => {
     host: process.env.PGHOST,
     port: Number(process.env.PGPORT),
     database: "postgres", // connect to the default postgres db
+    ssl: {
+      rejectUnauthorized: false,
+    },	
   });
 
   try {
@@ -50,6 +53,9 @@ const createDatabaseTables = async () => {
     host: process.env.PGHOST,
     port: parseInt(process.env.PGPORT ?? "5432"),
     database: DB_NAME,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   });
 
   console.log("Creating database tables");

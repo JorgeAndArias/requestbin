@@ -6,7 +6,16 @@ class PostgresClient {
   pool: Pool;
 
   constructor() {
-    this.pool = new Pool();
+    this.pool = new Pool({
+      user: process.env.PGUSER,
+      password: process.env.PGPASSWORD,
+      host: process.env.PGHOST,
+      port: Number(process.env.PGPORT),
+      database: process.env.PGDATABASE,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
     console.log("Connected to PostgreSQL server");
   }
 

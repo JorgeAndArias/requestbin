@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
 import { RequestBody } from "../types";
+import path from "path";
+require('dotenv').config();
 
 class MongoClient {
-  private dbName: string;
   private requestBodyModel: mongoose.Model<RequestBody>;
 
-  constructor(dbName: string = "requestBodies") {
-    this.dbName = dbName;
-
+  constructor() {
     const schema = new mongoose.Schema<RequestBody>({
       request: mongoose.Schema.Types.String,
     });
@@ -39,9 +38,33 @@ class MongoClient {
   }
 
   public async connectToDatabase(): Promise<void> {
+    const username = encodeURIComponent(process.env.MONGO_USERNAME ?? "");
+    const password = encodeURIComponent(process.env.MONGO_PASSWORD ?? "");
+    const host = process.env.MONGO_HOST ?? "";
+    const dbName = process.env.MONGO_DB_NAME ?? "";
+    const retryWrites = process.env.MONGO_RETRY_WRITES ?? "false";
+    const tls = process.env.MONGO_TLS ?? "true";
+    const tlsCAFile = process.env.MONGO_TLS_CA_FILE ?? "global-bundle.pem";
+    const replicaSet = process.env.MONGO_REPLICA_SET ?? "rs0";
+    const readPreference = process.env.MONGO_READ_PREFERENCE ?? "secondaryPreferred";
+
+    const tlsCAFilePath = path.resolve(__dirname, `../${tlsCAFile}`);
+
+    const uri = `mongodb://${username}:${password}@${host}/${dbName}?` +
+      `tls=${tls}` +
+      `&replicaSet=${replicaSet}` +
+      `&readPreference=${readPreference}` +
+      `&retryWrites=${retryWrites}`;
+
     try {
       if (mongoose.connection.readyState !== 1) {
-        await mongoose.connect(`${process.env.MONGODB_URI}/${this.dbName}`);
+        console.log(uri);
+	await mongoose.connect(uri, {
+          tlsCAFile: tlsCAFilePath,
+          tls: tls === "true",
+          authMechanism: "SCRAM-SHA-1",
+          retryWrites: retryWrites === "true",
+        });
         console.log("Connected to MongoDB");
       }
     } catch (error: any) {
@@ -106,5 +129,8 @@ class MongoClient {
     }
   }
 }
+
+const mongo = new MongoClient();
+mongo.connectToDatabase();
 
 export default MongoClient;
